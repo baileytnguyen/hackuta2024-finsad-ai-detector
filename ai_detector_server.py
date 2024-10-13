@@ -16,19 +16,30 @@ client = OpenAI(api_key=api_key)
 
 class ScamDetectionService(comment_scam_detector_pb2_grpc.ScamDetectionServiceServicer):
     def DetectScam(self, request, context):
-        # Prepare the messages for OpenAI API
+        # Prepare the system message for OpenAI API
         messages = [
-            {"role": "system", "content": "You are a helpful assistant that finds scams. If you think it's a scam, say 'scam' only"},
-            {"role": "user", "content": "Analyze the following comments for scams: "},
+            {"role": "system", "content": "You are a helpful assistant that finds financial scams. I am seeing social engineering scams online that follow the same structure to make people click on a link or look up a person. The scams give sometimes offer financial advice. If you think it's a scam, say 'scam' only"},
         ]
+
+        messages_bad = []
         
-        # Append each comment to the messages
+        # Concatenate all comments into a single block (one entry)
+        combined_comments = " ".join([f"User: {comment.username} said: '{comment.comment_text}'"
+                                      for comment in request.thread.comments])
+
+        
         for comment in request.thread.comments:
-            messages.append({
+            messages_bad.append({
                 "role": "user",
                 "content": f"User: {comment.username} - Comment: {comment.comment_text}"
             })
-            
+        
+        # Append the concatenated comments as a single message
+        messages.append({
+            "role": "user",
+            "content": f"Here are the comments to analyze:\n{combined_comments}"
+        })
+        
         # Call the OpenAI API
         completion = client.chat.completions.create(
             model="gpt-4o-mini",  # Specify the model you are using
@@ -37,14 +48,17 @@ class ScamDetectionService(comment_scam_detector_pb2_grpc.ScamDetectionServiceSe
         
         # Extract the response from OpenAI
         openai_response = completion.choices[0].message.content
-        print('openai_response:', openai_response)
+        print('OpenAI response:', openai_response)
+        user_id = str(comment.comment_text) ########
+        print('USERNAME:', user_id)
+        comment = str(comment.comment_text) ########
+        print('COMMENT:', comment,'\n')
+
         # Example of processing the OpenAI response to set the is_scam flag
-        # This is a simple implementation; you may want to customize this logic
-        #is_scam = "scam" in openai_response  # Detect if 'scam' is mentioned
-        is_scam = True
+        is_scam = "scam" in openai_response.lower()  # Detect if 'scam' is mentioned
         message = openai_response
-        confidence = 0.95 if is_scam else 0.1  # Example confidence levels
-        print(message)
+        confidence = 90 if is_scam else 10  # Adjust confidence based on the response
+        
         # Create and return the response
         return comment_scam_detector_pb2.ScamDetectionResponse(
             is_scam=is_scam,
