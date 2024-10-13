@@ -51,7 +51,7 @@ def main():
         {
             "user_id": "user6",
             "username": "MrOnion45",
-            "comment_text": "Buying assets may seem straightforward, but choosing the right stock without a tested plan can be challenging. I've been attempting for some time to increase the size of my $210K portfolio, but the largest obstacle is the absence of clear entry and exit plans. Any guidance in this regard would be much valued. | Many folks overlook the importance of advisors until their emotions cause them problems. I recall a few summers ago, after my lengthy divorce, I needed support to keep my business going. I searched for licensed advisors and found someone extremely qualified. She helped grow my reserve from $175K to $550K, despite inflation.",
+            "comment_text": "i love taco bell",
             "timestamp": 1633073300
         }
     ]

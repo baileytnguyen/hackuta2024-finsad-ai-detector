@@ -18,16 +18,14 @@ class ScamDetectionService(comment_scam_detector_pb2_grpc.ScamDetectionServiceSe
     def DetectScam(self, request, context):
         # Prepare the system message for OpenAI API
         messages = [
-            {"role": "system", "content": "You are a helpful assistant that finds financial scams. I am seeing social engineering scams online that follow the same structure to make people click on a link or look up a person. The scams give sometimes offer financial advice. If you think it's a scam, say 'scam' only"},
+            {"role": "system", "content": "You are a helpful assistant that finds financial scams. I am seeing social engineering scams online that follow the same structure to make people click on a link or look up a person. The scams give sometimes offer financial advice. If you think it's a socially engineered scam, say 'scam' only. If you think it's not a socially engineered scam, say 'bananas' only."},
         ]
-
-        messages_bad = []
         
         # Concatenate all comments into a single block (one entry)
         combined_comments = " ".join([f"User: {comment.username} said: '{comment.comment_text}'"
                                       for comment in request.thread.comments])
 
-        
+        messages_bad = []
         for comment in request.thread.comments:
             messages_bad.append({
                 "role": "user",
